@@ -23,9 +23,16 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     return http.csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(
-            auth -> auth.requestMatchers("/test/welcome").permitAll().anyRequest().authenticated())
-        .formLogin(form -> form.defaultSuccessUrl("/", true).permitAll())
-        .logout(logout -> logout.logoutSuccessUrl("/test/welcome").permitAll())
+            auth ->
+                auth.requestMatchers("/", "/api/auth/**")
+                    .permitAll()
+                    .requestMatchers("/api/**")
+                    .authenticated()
+                    .anyRequest()
+                    .permitAll())
+        .httpBasic(AbstractHttpConfigurer::disable)
+        .formLogin(AbstractHttpConfigurer::disable)
+        .logout(AbstractHttpConfigurer::disable)
         .userDetailsService(userDetailsService)
         .build();
   }
