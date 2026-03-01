@@ -10,12 +10,13 @@ public class UserMapper {
 
   public User toDomain(UserEntity entity) {
     Role role = Role.fromString(entity.getRole());
-    return new User(entity.getName(), entity.getPassword(), role);
+    return new User(entity.getUuid(), entity.getLogin(), entity.getPassword(), role);
   }
 
   public UserEntity toEntity(User user) {
     UserEntity entity = new UserEntity();
-    entity.setName(user.getUsername());
+    entity.setUuid(user.getUuid());
+    entity.setLogin(user.getLogin());
     entity.setPassword(user.getPassword());
     entity.setRole(user.getRole().getAuthority());
     return entity;
