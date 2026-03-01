@@ -15,19 +15,19 @@ public class TestController {
     return "this is unprotected page";
   }
 
-  @GetMapping("/users")
+  @GetMapping("/user")
   @PreAuthorize("hasAuthority('ROLE_USER')")
   public String pageForUser() {
     return "this is page for users";
   }
 
-  @GetMapping("/admins")
+  @GetMapping("/admin")
   @PreAuthorize("hasAuthority('ROLE_ADMIN')")
   public String pageForAdmin() {
     return "this is page for admins";
   }
 
-  @GetMapping("/engineers")
+  @GetMapping("/engineer")
   @PreAuthorize("hasAuthority('ROLE_ENGINEER')")
   public String pageForEngineer() {
     return "This is a page for engineers with ROLE_ENGINEER";
