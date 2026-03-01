@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("test/")
+@RequestMapping("/test")
 @AllArgsConstructor
 public class TestController {
   @GetMapping("/welcome")
@@ -27,8 +27,15 @@ public class TestController {
     return "this is page for admins";
   }
 
+  @GetMapping("/engineers")
+  @PreAuthorize("hasAuthority('ROLE_ENGINEER')")
+  public String pageForEngineer() {
+    return "This is a page for engineers with ROLE_ENGINEER";
+  }
+
   @GetMapping("/all")
+  @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN', 'ROLE_ENGINEER')")
   public String pageForAll() {
-    return "this is page for all employees";
+    return "This is a page for all authenticated employees";
   }
 }
