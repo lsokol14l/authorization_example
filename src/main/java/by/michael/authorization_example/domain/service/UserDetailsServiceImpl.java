@@ -1,27 +1,29 @@
 package by.michael.authorization_example.domain.service;
 
-import by.michael.authorization_example.datasource.entity.UserEntity;
+import by.michael.authorization_example.datasource.mapper.UserMapper;
 import by.michael.authorization_example.datasource.repository.UserRepo;
-import java.util.Optional;
-
 import by.michael.authorization_example.domain.model.SecurityUser;
+import by.michael.authorization_example.domain.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
   private final UserRepo userRepo;
+  private final UserMapper userMapper; // ✅ Внедряем mapper
 
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    Optional<UserEntity> user = userRepo.findByName(username);
+    User user =
+        userRepo
+            .findByName(username)
+            .map(userMapper::toDomain)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-    return user.map(SecurityUser::new)
-        .orElseThrow(
-            () -> new UsernameNotFoundException(username + " There is no such user in REPO"));
+    return new SecurityUser(user);
   }
 }
