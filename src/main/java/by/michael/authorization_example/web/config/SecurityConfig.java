@@ -4,6 +4,7 @@ import by.michael.authorization_example.domain.service.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -14,31 +15,37 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
-  private final UserDetailsServiceImpl userDetailsService;
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     return http.csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(
             auth ->
-                auth.requestMatchers("/", "/api/auth/**")
+                auth
+                    // Публичные эндпоинты
+                    .requestMatchers("/", "/api/auth/register", "/api/auth/login")
                     .permitAll()
-                    .requestMatchers("/api/**")
+
+                    // Защищенные эндпоинты - требуют авторизации
+                    .requestMatchers("/api/games/**")
                     .authenticated()
+                    .requestMatchers("/api/profile/**")
+                    .authenticated()
+
+                    // Админские эндпоинты - требуют роль ADMIN
+                    .requestMatchers("/api/admin/**")
+                    .hasRole("ADMIN")
+
+                    // Все остальное - требует авторизации
                     .anyRequest()
-                    .permitAll())
-        .httpBasic(AbstractHttpConfigurer::disable)
-        .formLogin(AbstractHttpConfigurer::disable)
-        .logout(AbstractHttpConfigurer::disable)
-        .userDetailsService(userDetailsService)
+                    .authenticated())
+        .httpBasic(Customizer.withDefaults())
         .build();
   }
 
   @Bean
   public PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder(5);
+    return new BCryptPasswordEncoder();
   }
 }
